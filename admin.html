@@ -3,12 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <title>لوحة التحكم | متجر الخير</title>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/browser-image-compression@2.0.2/dist/browser-image-compression.js"></script>
     <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
     <style>
-        .admin-container { max-width: 750px; margin: 40px auto; background: white; padding: 30px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+        body { font-family: 'Cairo', sans-serif; background-color: #f3f4f6; padding: 20px; text-align: right; margin: 0; }
+        .admin-container { max-width: 750px; margin: 20px auto; background: white; padding: 30px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
         .form-group { margin-bottom: 20px; }
-        input[type="text"], select { width: 100%; padding: 12px; border: 2px solid #eee; border-radius: 12px; outline: none; transition: 0.3s; font-family: 'Cairo'; }
+        label { display: block; margin-bottom: 8px; font-weight: bold; color: #374151; }
+        input[type="text"], select { width: 100%; padding: 12px; border: 2px solid #eee; border-radius: 12px; outline: none; transition: 0.3s; font-family: 'Cairo'; box-sizing: border-box; }
         input[type="text"]:focus, select:focus { border-color: #D97706; }
         
         .admin-btn { 
@@ -16,24 +18,29 @@
             color: white; border: none; padding: 16px; width: 100%; 
             border-radius: 50px; font-weight: 700; cursor: pointer; 
             box-shadow: 0 4px 15px rgba(217, 119, 6, 0.3); transition: 0.3s;
+            font-family: 'Cairo'; font-size: 16px;
         }
         .admin-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(217, 119, 6, 0.4); }
+        .admin-btn:disabled { background: #ccc; cursor: not-allowed; box-shadow: none; }
 
         #imgPreviewContainer { display: flex; gap: 12px; flex-wrap: wrap; margin: 15px 0; }
-        .preview-item { position: relative; width: 90px; height: 90px; }
+        .preview-item { position: relative; width: 80px; height: 80px; }
         .preview-item img { width: 100%; height: 100%; object-fit: cover; border-radius: 12px; border: 2px solid #D97706; }
-        .remove-img-btn { position: absolute; top: -8px; right: -8px; background: #ef4444; color: white; border: none; border-radius: 50%; width: 22px; height: 22px; cursor: pointer; font-size: 14px; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+        .remove-img-btn { position: absolute; top: -8px; right: -8px; background: #ef4444; color: white; border: none; border-radius: 50%; width: 22px; height: 22px; cursor: pointer; font-size: 14px; display: flex; align-items: center; justify-content: center; }
 
-        .admin-item { display: flex; align-items: center; justify-content: space-between; padding: 15px; border-bottom: 1px solid #eee; }
-        .admin-item img { width: 55px; height: 55px; border-radius: 8px; object-fit: cover; }
-        .actions-btns { display: flex; gap: 8px; }
-        .edit-action { background: #f3f4f6; color: #1f2937; border: none; padding: 8px 15px; border-radius: 50px; cursor: pointer; }
-        .del-action { background: #fee2e2; color: #dc2626; border: none; padding: 8px 15px; border-radius: 50px; cursor: pointer; }
+        .admin-item { display: flex; align-items: center; justify-content: space-between; padding: 12px; border-bottom: 1px solid #eee; background: #fff; margin-bottom: 5px; border-radius: 10px; }
+        .admin-item img { width: 50px; height: 50px; border-radius: 8px; object-fit: cover; background: #f9f9f9; }
+        .actions-btns { display: flex; gap: 5px; }
+        .edit-action { background: #f3f4f6; color: #1f2937; border: none; padding: 6px 12px; border-radius: 50px; cursor: pointer; font-size: 13px; }
+        .del-action { background: #fee2e2; color: #dc2626; border: none; padding: 6px 12px; border-radius: 50px; cursor: pointer; font-size: 13px; }
+        
+        #compressionStatus { display: none; color: #D97706; font-size: 13px; font-weight: bold; margin-bottom: 10px; text-align: center; background: #fffbeb; padding: 10px; border-radius: 10px; border: 1px solid #fde68a; }
+        .loader { text-align: center; padding: 20px; color: #6b7280; font-weight: bold; }
     </style>
 </head>
 <body>
     <div class="admin-container">
-        <h2 id="formTitle" style="color:#1f2937; margin-bottom:20px;">إضافة منتج جديد للمتجر</h2>
+        <h2 id="formTitle" style="color:#1f2937; margin-bottom:20px;">إضافة منتج جديد</h2>
         <input type="hidden" id="editKey" value="">
         
         <div class="form-group"><label>اسم المنتج</label><input type="text" id="pName" placeholder="مثلاً: طقم فناجين"></div>
@@ -48,24 +55,27 @@
         </div>
         
         <div class="form-group">
-            <label>صور المنتج</label>
+            <label>صور المنتج (يتم تحسينها للسرعة)</label>
+            <div id="compressionStatus">⏳ جاري معالجة الصور للرفع السريع...</div>
             <input type="file" id="pImgFile" multiple accept="image/*" onchange="handleMultipleFiles(this)">
             <div id="imgPreviewContainer"></div>
         </div>
 
-        <div class="form-group"><label>وصف المنتج</label><div id="editor"></div></div>
+        <div class="form-group"><label>وصف المنتج</label><div id="editor" style="height: 150px;"></div></div>
 
-        <button class="admin-btn" onclick="handleSave()">حفظ ونشر أونلاين</button>
+        <button id="saveBtn" class="admin-btn" onclick="handleSave()">حفظ ونشر المنتج</button>
         <button id="cancelBtn" style="display:none; background:#6b7280; margin-top:10px;" class="admin-btn" onclick="resetForm()">إلغاء التعديل</button>
 
-        <div id="adminList" style="margin-top:30px;">جاري تحميل المنتجات...</div>
-        <a href="index.html" style="display:block; text-align:center; margin-top:25px; color:#D97706; text-decoration:none; font-weight:bold;">العودة للمتجر</a>
+        <hr style="margin: 30px 0; border: 0; border-top: 1px solid #eee;">
+        <div id="adminList"><div class="loader">جاري تحميل المنتجات...</div></div>
+        
+        <a href="index.html" style="display:block; text-align:center; margin-top:25px; color:#D97706; text-decoration:none; font-weight:bold; font-size: 14px;">العودة للمتجر</a>
     </div>
 
     <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getDatabase, ref, push, set, onValue, remove, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+        import { getDatabase, ref, push, onValue, remove, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyBbraVWA6lda9zMobQluPWy02tOZ0A8EVc",
@@ -84,29 +94,45 @@
         let currentImagesArray = [];
         let allProducts = {};
 
-        window.handleMultipleFiles = (input) => {
+        // تحسين الضغط بشكل كبير لتقليل حجم قاعدة البيانات
+        window.handleMultipleFiles = async (input) => {
             const files = Array.from(input.files);
-            files.forEach(file => {
-                const reader = new FileReader();
-                reader.onloadend = () => {
-                    currentImagesArray.push(reader.result);
-                    renderImagesPreview();
-                };
-                reader.readAsDataURL(file);
-            });
+            if (files.length === 0) return;
+
+            const status = document.getElementById('compressionStatus');
+            const saveBtn = document.getElementById('saveBtn');
+            status.style.display = "block";
+            saveBtn.disabled = true;
+
+            const options = {
+                maxSizeMB: 0.15,         // تقليل الحجم لـ 150 كيلوبايت لسرعة التحميل
+                maxWidthOrHeight: 850,   // حجم مثالي للهواتف
+                useWebWorker: true,
+                initialQuality: 0.6      // جودة متوازنة جداً
+            };
+
+            for (const file of files) {
+                try {
+                    const compressedFile = await imageCompression(file, options);
+                    const base64 = await imageCompression.getDataUrlFromFile(compressedFile);
+                    currentImagesArray.push(base64);
+                } catch (error) { console.error(error); }
+            }
+
+            renderImagesPreview();
             input.value = ""; 
+            status.style.display = "none";
+            saveBtn.disabled = false;
         };
 
         function renderImagesPreview() {
             const container = document.getElementById('imgPreviewContainer');
-            container.innerHTML = "";
-            currentImagesArray.forEach((src, idx) => {
-                container.innerHTML += `
-                    <div class="preview-item">
-                        <img src="${src}">
-                        <button class="remove-img-btn" onclick="removeSpecificImg(${idx})">×</button>
-                    </div>`;
-            });
+            container.innerHTML = currentImagesArray.map((src, idx) => `
+                <div class="preview-item">
+                    <img src="${src}" loading="lazy">
+                    <button class="remove-img-btn" onclick="removeSpecificImg(${idx})">×</button>
+                </div>
+            `).join('');
         }
 
         window.removeSpecificImg = (idx) => {
@@ -120,48 +146,46 @@
             const category = document.getElementById('pCategory').value;
             const key = document.getElementById('editKey').value;
             
-            if(!name || !price || currentImagesArray.length === 0) return alert("يرجى ملء كافة الخانات واختيار صورة");
+            if(!name || !price || currentImagesArray.length === 0) return alert("يرجى ملء البيانات والصور");
 
-            const data = { 
-                title: name, 
-                price: price, 
-                category: category,
-                images: currentImagesArray, 
-                desc: quill.root.innerHTML 
-            };
+            const data = { title: name, price, category, images: currentImagesArray, desc: quill.root.innerHTML };
+            const saveBtn = document.getElementById('saveBtn');
+            saveBtn.disabled = true;
 
-            if(key === "") {
-                push(ref(db, 'products'), data).then(() => {
-                    alert("تمت الإضافة بنجاح");
-                    resetForm();
-                });
-            } else {
-                update(ref(db, 'products/' + key), data).then(() => {
-                    alert("تم التعديل بنجاح");
-                    resetForm();
-                });
-            }
+            const targetRef = key === "" ? ref(db, 'products') : ref(db, 'products/' + key);
+            const action = key === "" ? push(targetRef, data) : update(targetRef, data);
+
+            action.then(() => {
+                alert("تم بنجاح");
+                resetForm();
+            }).finally(() => { saveBtn.disabled = false; });
         };
 
+        // تحسين عرض القائمة ليكون أسرع (DOM Performance)
         onValue(ref(db, 'products'), (snapshot) => {
             allProducts = snapshot.val() || {};
             const container = document.getElementById('adminList');
-            container.innerHTML = "<h3>المنتجات المنشورة:</h3>";
+            let htmlBuffer = "<h3>المنتجات المنشورة:</h3>";
             
-            for (let key in allProducts) {
+            const keys = Object.keys(allProducts);
+            if(keys.length === 0) htmlBuffer += "<p>لا توجد منتجات حالياً</p>";
+
+            keys.forEach(key => {
                 const p = allProducts[key];
                 const catName = p.category === 'electrical' ? 'كهربائية' : 'عادية';
                 const firstImg = (p.images && p.images.length > 0) ? p.images[0] : '';
-                container.innerHTML += `
+                
+                htmlBuffer += `
                     <div class="admin-item">
-                        <img src="${firstImg}">
-                        <span style="flex-grow:1; margin-right:15px; font-weight:600;">${p.title} (${catName})</span>
+                        <img src="${firstImg}" loading="lazy">
+                        <span style="flex-grow:1; margin-right:12px; font-weight:600; font-size:14px;">${p.title}</span>
                         <div class="actions-btns">
                             <button class="edit-action" onclick="startEdit('${key}')">تعديل</button>
                             <button class="del-action" onclick="deleteProduct('${key}')">حذف</button>
                         </div>
                     </div>`;
-            }
+            });
+            container.innerHTML = htmlBuffer;
         });
 
         window.startEdit = (key) => {
@@ -173,15 +197,13 @@
             renderImagesPreview();
             quill.root.innerHTML = p.desc;
             document.getElementById('editKey').value = key;
-            document.getElementById('formTitle').innerText = "تعديل منتج: " + p.title;
+            document.getElementById('formTitle').innerText = "تعديل المنتج";
             document.getElementById('cancelBtn').style.display = "block";
             window.scrollTo({ top: 0, behavior: 'smooth' });
         };
 
         window.deleteProduct = (key) => {
-            if(confirm("هل أنت متأكد من حذف هذا المنتج؟")) {
-                remove(ref(db, 'products/' + key));
-            }
+            if(confirm("حذف المنتج نهائياً؟")) remove(ref(db, 'products/' + key));
         };
 
         window.resetForm = () => {
