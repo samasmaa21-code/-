@@ -2,77 +2,651 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>لوحة التحكم | متجر الخير</title>
-    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/browser-image-compression@2.0.2/dist/browser-image-compression.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة التحكم | أواني مطبخ الخير</title>
+
+    <script src="https://cdn.jsdelivr.net/npm/browser-image-compression@2.0.2/dist/browser-image-compression.js"></script>
     <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+
     <style>
-        body { font-family: 'Cairo', sans-serif; background-color: #f3f4f6; padding: 20px; text-align: right; margin: 0; }
-        .admin-container { max-width: 750px; margin: 20px auto; background: white; padding: 30px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
-        .form-group { margin-bottom: 20px; }
-        label { display: block; margin-bottom: 8px; font-weight: bold; color: #374151; }
-        input[type="text"], select { width: 100%; padding: 12px; border: 2px solid #eee; border-radius: 12px; outline: none; transition: 0.3s; font-family: 'Cairo'; box-sizing: border-box; }
-        input[type="text"]:focus, select:focus { border-color: #D97706; }
-        
-        .admin-btn { 
-            background: linear-gradient(135deg, #D97706 0%, #B45309 100%); 
-            color: white; border: none; padding: 16px; width: 100%; 
-            border-radius: 50px; font-weight: 700; cursor: pointer; 
-            box-shadow: 0 4px 15px rgba(217, 119, 6, 0.3); transition: 0.3s;
-            font-family: 'Cairo'; font-size: 16px;
+        * {
+            box-sizing: border-box;
         }
-        .admin-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(217, 119, 6, 0.4); }
-        .admin-btn:disabled { background: #ccc; cursor: not-allowed; box-shadow: none; }
 
-        #imgPreviewContainer { display: flex; gap: 12px; flex-wrap: wrap; margin: 15px 0; }
-        .preview-item { position: relative; width: 80px; height: 80px; }
-        .preview-item img { width: 100%; height: 100%; object-fit: cover; border-radius: 12px; border: 2px solid #D97706; }
-        .remove-img-btn { position: absolute; top: -8px; right: -8px; background: #ef4444; color: white; border: none; border-radius: 50%; width: 22px; height: 22px; cursor: pointer; font-size: 14px; display: flex; align-items: center; justify-content: center; }
+        body {
+            margin: 0;
+            font-family: 'Cairo', sans-serif;
+            background: linear-gradient(180deg, #fffdf7 0%, #f8fafc 100%);
+            color: #1f2937;
+        }
 
-        .admin-item { display: flex; align-items: center; justify-content: space-between; padding: 12px; border-bottom: 1px solid #eee; background: #fff; margin-bottom: 5px; border-radius: 10px; }
-        .admin-item img { width: 50px; height: 50px; border-radius: 8px; object-fit: cover; background: #f9f9f9; }
-        .actions-btns { display: flex; gap: 5px; }
-        .edit-action { background: #f3f4f6; color: #1f2937; border: none; padding: 6px 12px; border-radius: 50px; cursor: pointer; font-size: 13px; }
-        .del-action { background: #fee2e2; color: #dc2626; border: none; padding: 6px 12px; border-radius: 50px; cursor: pointer; font-size: 13px; }
-        
-        #compressionStatus { display: none; color: #D97706; font-size: 13px; font-weight: bold; margin-bottom: 10px; text-align: center; background: #fffbeb; padding: 10px; border-radius: 10px; border: 1px solid #fde68a; }
-        .loader { text-align: center; padding: 20px; color: #6b7280; font-weight: bold; }
+        .page-wrap {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .topbar {
+            background: linear-gradient(135deg, #D97706 0%, #B45309 100%);
+            color: white;
+            border-radius: 24px;
+            padding: 24px;
+            box-shadow: 0 12px 30px rgba(217, 119, 6, 0.22);
+            margin-bottom: 20px;
+        }
+
+        .topbar-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .topbar h1 {
+            margin: 0 0 8px;
+            font-size: 30px;
+            font-weight: 800;
+        }
+
+        .topbar p {
+            margin: 0;
+            opacity: 0.95;
+            line-height: 1.8;
+        }
+
+        .top-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .top-btn {
+            text-decoration: none;
+            border: none;
+            cursor: pointer;
+            background: rgba(255,255,255,0.18);
+            color: white;
+            padding: 12px 18px;
+            border-radius: 50px;
+            font-family: 'Cairo', sans-serif;
+            font-weight: 700;
+            transition: 0.3s;
+        }
+
+        .top-btn:hover {
+            background: rgba(255,255,255,0.28);
+            transform: translateY(-1px);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .stat-card {
+            background: white;
+            border: 1px solid #f3e8d3;
+            border-radius: 20px;
+            padding: 18px;
+            box-shadow: 0 8px 22px rgba(15, 23, 42, 0.05);
+        }
+
+        .stat-label {
+            color: #6b7280;
+            font-size: 14px;
+            margin-bottom: 8px;
+            font-weight: 700;
+        }
+
+        .stat-value {
+            font-size: 28px;
+            font-weight: 800;
+            color: #D97706;
+        }
+
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1.1fr 0.9fr;
+            gap: 20px;
+            align-items: start;
+        }
+
+        .card {
+            background: white;
+            border-radius: 24px;
+            padding: 24px;
+            box-shadow: 0 12px 30px rgba(15, 23, 42, 0.06);
+            border: 1px solid #f1f5f9;
+        }
+
+        .card h2,
+        .card h3 {
+            margin-top: 0;
+            margin-bottom: 18px;
+            color: #111827;
+        }
+
+        .section-note {
+            color: #6b7280;
+            font-size: 14px;
+            margin-top: -8px;
+            margin-bottom: 18px;
+            line-height: 1.8;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-group.full {
+            grid-column: 1 / -1;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 700;
+            color: #374151;
+            font-size: 15px;
+        }
+
+        input[type="text"],
+        input[type="password"],
+        select {
+            width: 100%;
+            padding: 14px 16px;
+            border: 2px solid #edf2f7;
+            border-radius: 16px;
+            outline: none;
+            transition: 0.25s;
+            font-family: 'Cairo', sans-serif;
+            font-size: 15px;
+            background: #fff;
+        }
+
+        input[type="text"]:focus,
+        input[type="password"]:focus,
+        select:focus {
+            border-color: #D97706;
+            box-shadow: 0 0 0 4px rgba(217, 119, 6, 0.08);
+        }
+
+        .upload-box {
+            border: 2px dashed #f59e0b;
+            background: #fffaf0;
+            border-radius: 18px;
+            padding: 18px;
+        }
+
+        .upload-box input[type="file"] {
+            width: 100%;
+            font-family: 'Cairo', sans-serif;
+        }
+
+        .upload-help {
+            margin-top: 10px;
+            color: #6b7280;
+            font-size: 13px;
+            line-height: 1.8;
+        }
+
+        #compressionStatus {
+            display: none;
+            color: #92400e;
+            font-size: 14px;
+            font-weight: 700;
+            margin-bottom: 12px;
+            text-align: center;
+            background: #fffbeb;
+            padding: 12px;
+            border-radius: 14px;
+            border: 1px solid #fde68a;
+        }
+
+        #imgPreviewContainer {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+            gap: 12px;
+            margin-top: 16px;
+        }
+
+        .preview-item {
+            position: relative;
+            height: 95px;
+            border-radius: 16px;
+            overflow: hidden;
+            border: 2px solid #f3d7a5;
+            background: #fff;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.06);
+        }
+
+        .preview-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .remove-img-btn {
+            position: absolute;
+            top: 6px;
+            left: 6px;
+            background: #ef4444;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            cursor: pointer;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 10px rgba(239, 68, 68, 0.3);
+        }
+
+        .editor-wrap {
+            border-radius: 18px;
+            overflow: hidden;
+            border: 2px solid #edf2f7;
+            background: white;
+        }
+
+        #editor {
+            height: 180px;
+            background: white;
+        }
+
+        .action-row {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 18px;
+        }
+
+        .admin-btn {
+            background: linear-gradient(135deg, #D97706 0%, #B45309 100%);
+            color: white;
+            border: none;
+            padding: 14px 18px;
+            border-radius: 50px;
+            font-weight: 800;
+            cursor: pointer;
+            box-shadow: 0 8px 18px rgba(217, 119, 6, 0.22);
+            transition: 0.3s;
+            font-family: 'Cairo', sans-serif;
+            font-size: 15px;
+            flex: 1;
+            min-width: 170px;
+        }
+
+        .admin-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 22px rgba(217, 119, 6, 0.28);
+        }
+
+        .admin-btn:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .secondary-btn {
+            background: #eef2f7;
+            color: #1f2937;
+            box-shadow: none;
+        }
+
+        .secondary-btn:hover {
+            background: #e5e7eb;
+            box-shadow: none;
+        }
+
+        .danger-btn {
+            background: #fee2e2;
+            color: #b91c1c;
+            box-shadow: none;
+        }
+
+        .danger-btn:hover {
+            background: #fecaca;
+            box-shadow: none;
+        }
+
+        .products-tools {
+            display: grid;
+            grid-template-columns: 1fr 180px;
+            gap: 12px;
+            margin-bottom: 18px;
+        }
+
+        .products-tools input,
+        .products-tools select {
+            background: #f9fafb;
+        }
+
+        .products-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .admin-item {
+            display: grid;
+            grid-template-columns: 74px 1fr auto;
+            gap: 14px;
+            align-items: center;
+            padding: 14px;
+            border: 1px solid #eef2f7;
+            background: #fff;
+            border-radius: 18px;
+            transition: 0.25s;
+        }
+
+        .admin-item:hover {
+            border-color: #f3d7a5;
+            box-shadow: 0 8px 18px rgba(15, 23, 42, 0.05);
+        }
+
+        .admin-item img {
+            width: 74px;
+            height: 74px;
+            border-radius: 14px;
+            object-fit: cover;
+            background: #f8fafc;
+            border: 1px solid #f3f4f6;
+        }
+
+        .item-main {
+            min-width: 0;
+        }
+
+        .item-title {
+            margin: 0 0 6px;
+            font-size: 16px;
+            font-weight: 800;
+            color: #111827;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .item-meta {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            align-items: center;
+            margin-bottom: 6px;
+        }
+
+        .price-badge {
+            background: #fff7ed;
+            color: #c2410c;
+            padding: 4px 10px;
+            border-radius: 999px;
+            font-size: 13px;
+            font-weight: 800;
+        }
+
+        .cat-badge {
+            background: #f3f4f6;
+            color: #374151;
+            padding: 4px 10px;
+            border-radius: 999px;
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .img-count {
+            color: #6b7280;
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .item-desc {
+            color: #6b7280;
+            font-size: 13px;
+            line-height: 1.7;
+            max-height: 42px;
+            overflow: hidden;
+        }
+
+        .actions-btns {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .edit-action,
+        .del-action {
+            border: none;
+            padding: 9px 14px;
+            border-radius: 999px;
+            cursor: pointer;
+            font-size: 13px;
+            font-family: 'Cairo', sans-serif;
+            font-weight: 800;
+            transition: 0.25s;
+        }
+
+        .edit-action {
+            background: #eff6ff;
+            color: #1d4ed8;
+        }
+
+        .edit-action:hover {
+            background: #dbeafe;
+        }
+
+        .del-action {
+            background: #fee2e2;
+            color: #dc2626;
+        }
+
+        .del-action:hover {
+            background: #fecaca;
+        }
+
+        .loader,
+        .empty-state {
+            text-align: center;
+            padding: 30px 18px;
+            color: #6b7280;
+            font-weight: 700;
+            background: #f9fafb;
+            border-radius: 18px;
+            border: 1px dashed #d1d5db;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .mini-note {
+            font-size: 13px;
+            color: #6b7280;
+            margin-top: 8px;
+        }
+
+        .footer-note {
+            text-align: center;
+            color: #6b7280;
+            font-size: 13px;
+            margin-top: 20px;
+            padding-bottom: 10px;
+        }
+
+        @media (max-width: 980px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 700px) {
+            .form-grid,
+            .products-tools {
+                grid-template-columns: 1fr;
+            }
+
+            .admin-item {
+                grid-template-columns: 1fr;
+                text-align: center;
+            }
+
+            .admin-item img {
+                margin: 0 auto;
+            }
+
+            .actions-btns {
+                flex-direction: row;
+                justify-content: center;
+            }
+
+            .topbar h1 {
+                font-size: 24px;
+            }
+
+            .action-row {
+                flex-direction: column;
+            }
+
+            .admin-btn {
+                width: 100%;
+            }
+        }
     </style>
 </head>
 <body>
-    <div class="admin-container">
-        <h2 id="formTitle" style="color:#1f2937; margin-bottom:20px;">إضافة منتج جديد</h2>
-        <input type="hidden" id="editKey" value="">
-        
-        <div class="form-group"><label>اسم المنتج</label><input type="text" id="pName" placeholder="مثلاً: طقم فناجين"></div>
-        <div class="form-group"><label>السعر</label><input type="text" id="pPrice" placeholder="180 MAD"></div>
-        
-        <div class="form-group">
-            <label>تصنيف المنتج</label>
-            <select id="pCategory">
-                <option value="normal">أواني منزلية عادية</option>
-                <option value="electrical">تجهيزات كهربائية</option>
-            </select>
-        </div>
-        
-        <div class="form-group">
-            <label>صور المنتج (يتم تحسينها للسرعة)</label>
-            <div id="compressionStatus">⏳ جاري معالجة الصور للرفع السريع...</div>
-            <input type="file" id="pImgFile" multiple accept="image/*" onchange="handleMultipleFiles(this)">
-            <div id="imgPreviewContainer"></div>
+
+    <div class="page-wrap">
+
+        <div class="topbar">
+            <div class="topbar-row">
+                <div>
+                    <h1>لوحة تحكم أواني مطبخ الخير</h1>
+                    <p>أضيفي المنتجات، عدّلي الأسعار والصور، وتابعي ما تم نشره في المتجر بشكل سريع ومرتب.</p>
+                </div>
+
+                <div class="top-actions">
+                    <a class="top-btn" href="index.html">العودة للمتجر</a>
+                    <button class="top-btn" onclick="resetForm()">إضافة منتج جديد</button>
+                </div>
+            </div>
         </div>
 
-        <div class="form-group"><label>وصف المنتج</label><div id="editor" style="height: 150px;"></div></div>
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-label">إجمالي المنتجات</div>
+                <div class="stat-value" id="statTotal">0</div>
+            </div>
 
-        <button id="saveBtn" class="admin-btn" onclick="handleSave()">حفظ ونشر المنتج</button>
-        <button id="cancelBtn" style="display:none; background:#6b7280; margin-top:10px;" class="admin-btn" onclick="resetForm()">إلغاء التعديل</button>
+            <div class="stat-card">
+                <div class="stat-label">أواني منزلية</div>
+                <div class="stat-value" id="statNormal">0</div>
+            </div>
 
-        <hr style="margin: 30px 0; border: 0; border-top: 1px solid #eee;">
-        <div id="adminList"><div class="loader">جاري تحميل المنتجات...</div></div>
-        
-        <a href="index.html" style="display:block; text-align:center; margin-top:25px; color:#D97706; text-decoration:none; font-weight:bold; font-size: 14px;">العودة للمتجر</a>
+            <div class="stat-card">
+                <div class="stat-label">تجهيزات كهربائية</div>
+                <div class="stat-value" id="statElectrical">0</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-label">إجمالي الصور</div>
+                <div class="stat-value" id="statImages">0</div>
+            </div>
+        </div>
+
+        <div class="main-grid">
+            <div class="card">
+                <h2 id="formTitle">إضافة منتج جديد</h2>
+                <div class="section-note">املئي المعلومات الأساسية، أضيفي الصور، ثم انشري المنتج مباشرة في المتجر.</div>
+
+                <input type="hidden" id="editKey" value="">
+
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="pName">اسم المنتج</label>
+                        <input type="text" id="pName" placeholder="مثلاً: طقم فناجين ذهبي">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="pPrice">السعر</label>
+                        <input type="text" id="pPrice" placeholder="مثلاً: 180 MAD">
+                    </div>
+
+                    <div class="form-group full">
+                        <label for="pCategory">تصنيف المنتج</label>
+                        <select id="pCategory">
+                            <option value="normal">أواني منزلية عادية</option>
+                            <option value="electrical">تجهيزات كهربائية</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group full">
+                        <label>صور المنتج</label>
+                        <div class="upload-box">
+                            <div id="compressionStatus">⏳ جاري معالجة الصور للرفع السريع...</div>
+                            <input type="file" id="pImgFile" multiple accept="image/*" onchange="handleMultipleFiles(this)">
+                            <div class="upload-help">
+                                تقدري تختاري أكثر من صورة. الصور كيتدار ليها ضغط تلقائي باش يبقى الموقع خفيف وسريع.
+                            </div>
+                            <div class="mini-note" id="imgCountNote">عدد الصور الحالية: 0</div>
+                            <div id="imgPreviewContainer"></div>
+                        </div>
+                    </div>
+
+                    <div class="form-group full">
+                        <label>وصف المنتج</label>
+                        <div class="editor-wrap">
+                            <div id="editor"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="action-row">
+                    <button id="saveBtn" class="admin-btn" onclick="handleSave()">حفظ ونشر المنتج</button>
+                    <button id="cancelBtn" class="admin-btn secondary-btn hidden" onclick="resetForm()">إلغاء التعديل</button>
+                    <button class="admin-btn danger-btn" onclick="clearOnlyDescription()">مسح الوصف</button>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>المنتجات المنشورة</h3>
+                <div class="section-note">يمكنك البحث عن منتج أو فلترة القائمة حسب التصنيف ثم التعديل أو الحذف.</div>
+
+                <div class="products-tools">
+                    <input type="text" id="listSearch" placeholder="ابحث عن منتج..." oninput="filterAdminList()">
+                    <select id="listCategory" onchange="filterAdminList()">
+                        <option value="all">كل التصنيفات</option>
+                        <option value="normal">أواني منزلية</option>
+                        <option value="electrical">تجهيزات كهربائية</option>
+                    </select>
+                </div>
+
+                <div id="adminList" class="products-list">
+                    <div class="loader">جاري تحميل المنتجات...</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer-note">
+            لوحة التحكم مرتبطة بقاعدة البيانات الحالية ديالك، وبالتالي أي تغيير هنا غادي يظهر مباشرة في المتجر. :contentReference[oaicite:1]{index=1}
+        </div>
     </div>
 
     <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getDatabase, ref, push, onValue, remove, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
@@ -90,133 +664,267 @@
 
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
-        var quill = new Quill('#editor', { theme: 'snow' });
+
+        const quill = new Quill('#editor', {
+            theme: 'snow',
+            placeholder: 'اكتبي وصف المنتج هنا...'
+        });
+
         let currentImagesArray = [];
         let allProducts = {};
 
-        // تحسين الضغط بشكل كبير لتقليل حجم قاعدة البيانات
+        function setSaveButtonState(isLoading, text = "حفظ ونشر المنتج") {
+            const btn = document.getElementById('saveBtn');
+            btn.disabled = isLoading;
+            btn.textContent = isLoading ? text : "حفظ ونشر المنتج";
+        }
+
+        function updateImageCount() {
+            document.getElementById('imgCountNote').textContent = `عدد الصور الحالية: ${currentImagesArray.length}`;
+        }
+
+        function formatCategoryLabel(cat) {
+            return cat === 'electrical' ? 'تجهيزات كهربائية' : 'أواني منزلية';
+        }
+
+        function stripHtml(html) {
+            const div = document.createElement('div');
+            div.innerHTML = html || '';
+            return (div.textContent || div.innerText || '').trim();
+        }
+
+        function renderStats() {
+            const products = Object.values(allProducts || {});
+            const total = products.length;
+            const normal = products.filter(p => (p.category || 'normal') === 'normal').length;
+            const electrical = products.filter(p => p.category === 'electrical').length;
+            const totalImages = products.reduce((sum, p) => sum + ((p.images && p.images.length) ? p.images.length : 0), 0);
+
+            document.getElementById('statTotal').textContent = total;
+            document.getElementById('statNormal').textContent = normal;
+            document.getElementById('statElectrical').textContent = electrical;
+            document.getElementById('statImages').textContent = totalImages;
+        }
+
+        function renderImagesPreview() {
+            const container = document.getElementById('imgPreviewContainer');
+
+            if (currentImagesArray.length === 0) {
+                container.innerHTML = '';
+                updateImageCount();
+                return;
+            }
+
+            container.innerHTML = currentImagesArray.map((src, idx) => `
+                <div class="preview-item">
+                    <img src="${src}" loading="lazy" alt="product image ${idx + 1}">
+                    <button class="remove-img-btn" onclick="removeSpecificImg(${idx})">×</button>
+                </div>
+            `).join('');
+
+            updateImageCount();
+        }
+
+        function renderAdminList() {
+            const searchValue = document.getElementById('listSearch').value.trim().toLowerCase();
+            const categoryValue = document.getElementById('listCategory').value;
+
+            const container = document.getElementById('adminList');
+            const entries = Object.entries(allProducts || {});
+
+            const filtered = entries.filter(([key, p]) => {
+                const titleMatch = (p.title || '').toLowerCase().includes(searchValue);
+                const categoryMatch = categoryValue === 'all' ? true : (p.category || 'normal') === categoryValue;
+                return titleMatch && categoryMatch;
+            });
+
+            if (filtered.length === 0) {
+                container.innerHTML = `<div class="empty-state">لا توجد منتجات مطابقة حالياً.</div>`;
+                return;
+            }
+
+            container.innerHTML = filtered.map(([key, p]) => {
+                const firstImg = (p.images && p.images.length > 0) ? p.images[0] : '';
+                const descText = stripHtml(p.desc || '');
+                return `
+                    <div class="admin-item">
+                        <img src="${firstImg}" alt="${p.title || ''}" loading="lazy">
+                        <div class="item-main">
+                            <p class="item-title">${p.title || 'بدون اسم'}</p>
+                            <div class="item-meta">
+                                <span class="price-badge">${p.price || ''}</span>
+                                <span class="cat-badge">${formatCategoryLabel(p.category || 'normal')}</span>
+                                <span class="img-count">${(p.images && p.images.length) ? p.images.length : 0} صور</span>
+                            </div>
+                            <div class="item-desc">${descText || 'لا يوجد وصف لهذا المنتج.'}</div>
+                        </div>
+                        <div class="actions-btns">
+                            <button class="edit-action" onclick="startEdit('${key}')">تعديل</button>
+                            <button class="del-action" onclick="deleteProduct('${key}')">حذف</button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        window.filterAdminList = () => {
+            renderAdminList();
+        };
+
         window.handleMultipleFiles = async (input) => {
             const files = Array.from(input.files);
             if (files.length === 0) return;
 
             const status = document.getElementById('compressionStatus');
-            const saveBtn = document.getElementById('saveBtn');
-            status.style.display = "block";
-            saveBtn.disabled = true;
+            status.style.display = 'block';
+
+            setSaveButtonState(true, 'جاري تجهيز الصور...');
 
             const options = {
-                maxSizeMB: 0.15,         // تقليل الحجم لـ 150 كيلوبايت لسرعة التحميل
-                maxWidthOrHeight: 850,   // حجم مثالي للهواتف
+                maxSizeMB: 0.18,
+                maxWidthOrHeight: 900,
                 useWebWorker: true,
-                initialQuality: 0.6      // جودة متوازنة جداً
+                initialQuality: 0.65
             };
 
-            for (const file of files) {
-                try {
-                    const compressedFile = await imageCompression(file, options);
+            try {
+                for (let i = 0; i < files.length; i++) {
+                    status.textContent = `⏳ جاري معالجة الصورة ${i + 1} من ${files.length}...`;
+                    const compressedFile = await imageCompression(files[i], options);
                     const base64 = await imageCompression.getDataUrlFromFile(compressedFile);
                     currentImagesArray.push(base64);
-                } catch (error) { console.error(error); }
+                }
+
+                renderImagesPreview();
+            } catch (error) {
+                console.error(error);
+                alert("وقع مشكل أثناء معالجة الصور.");
+            } finally {
+                input.value = "";
+                status.style.display = 'none';
+                setSaveButtonState(false);
             }
-
-            renderImagesPreview();
-            input.value = ""; 
-            status.style.display = "none";
-            saveBtn.disabled = false;
         };
-
-        function renderImagesPreview() {
-            const container = document.getElementById('imgPreviewContainer');
-            container.innerHTML = currentImagesArray.map((src, idx) => `
-                <div class="preview-item">
-                    <img src="${src}" loading="lazy">
-                    <button class="remove-img-btn" onclick="removeSpecificImg(${idx})">×</button>
-                </div>
-            `).join('');
-        }
 
         window.removeSpecificImg = (idx) => {
             currentImagesArray.splice(idx, 1);
             renderImagesPreview();
         };
 
-        window.handleSave = () => {
-            const name = document.getElementById('pName').value;
-            const price = document.getElementById('pPrice').value;
-            const category = document.getElementById('pCategory').value;
-            const key = document.getElementById('editKey').value;
-            
-            if(!name || !price || currentImagesArray.length === 0) return alert("يرجى ملء البيانات والصور");
-
-            const data = { title: name, price, category, images: currentImagesArray, desc: quill.root.innerHTML };
-            const saveBtn = document.getElementById('saveBtn');
-            saveBtn.disabled = true;
-
-            const targetRef = key === "" ? ref(db, 'products') : ref(db, 'products/' + key);
-            const action = key === "" ? push(targetRef, data) : update(targetRef, data);
-
-            action.then(() => {
-                alert("تم بنجاح");
-                resetForm();
-            }).finally(() => { saveBtn.disabled = false; });
+        window.clearOnlyDescription = () => {
+            quill.root.innerHTML = '';
         };
 
-        // تحسين عرض القائمة ليكون أسرع (DOM Performance)
-        onValue(ref(db, 'products'), (snapshot) => {
-            allProducts = snapshot.val() || {};
-            const container = document.getElementById('adminList');
-            let htmlBuffer = "<h3>المنتجات المنشورة:</h3>";
-            
-            const keys = Object.keys(allProducts);
-            if(keys.length === 0) htmlBuffer += "<p>لا توجد منتجات حالياً</p>";
+        window.handleSave = async () => {
+            const name = document.getElementById('pName').value.trim();
+            const price = document.getElementById('pPrice').value.trim();
+            const category = document.getElementById('pCategory').value;
+            const key = document.getElementById('editKey').value.trim();
+            const desc = quill.root.innerHTML;
 
-            keys.forEach(key => {
-                const p = allProducts[key];
-                const catName = p.category === 'electrical' ? 'كهربائية' : 'عادية';
-                const firstImg = (p.images && p.images.length > 0) ? p.images[0] : '';
-                
-                htmlBuffer += `
-                    <div class="admin-item">
-                        <img src="${firstImg}" loading="lazy">
-                        <span style="flex-grow:1; margin-right:12px; font-weight:600; font-size:14px;">${p.title}</span>
-                        <div class="actions-btns">
-                            <button class="edit-action" onclick="startEdit('${key}')">تعديل</button>
-                            <button class="del-action" onclick="deleteProduct('${key}')">حذف</button>
-                        </div>
-                    </div>`;
-            });
-            container.innerHTML = htmlBuffer;
-        });
+            if (!name) {
+                alert("يرجى كتابة اسم المنتج.");
+                return;
+            }
+
+            if (!price) {
+                alert("يرجى كتابة السعر.");
+                return;
+            }
+
+            if (currentImagesArray.length === 0) {
+                alert("يرجى إضافة صورة واحدة على الأقل.");
+                return;
+            }
+
+            const data = {
+                title: name,
+                price,
+                category,
+                images: currentImagesArray,
+                desc
+            };
+
+            setSaveButtonState(true, key ? 'جاري تحديث المنتج...' : 'جاري حفظ المنتج...');
+
+            try {
+                if (key === "") {
+                    await push(ref(db, 'products'), data);
+                    alert("تم نشر المنتج بنجاح.");
+                } else {
+                    await update(ref(db, 'products/' + key), data);
+                    alert("تم تحديث المنتج بنجاح.");
+                }
+
+                resetForm();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            } catch (error) {
+                console.error(error);
+                alert("وقع خطأ أثناء حفظ المنتج.");
+            } finally {
+                setSaveButtonState(false);
+            }
+        };
 
         window.startEdit = (key) => {
             const p = allProducts[key];
-            document.getElementById('pName').value = p.title;
-            document.getElementById('pPrice').value = p.price;
-            document.getElementById('pCategory').value = p.category || 'normal';
+            if (!p) return;
+
+            document.getElementById('pName').value = p.title || "";
+            document.getElementById('pPrice').value = p.price || "";
+            document.getElementById('pCategory').value = p.category || "normal";
+
             currentImagesArray = p.images ? [...p.images] : [];
             renderImagesPreview();
-            quill.root.innerHTML = p.desc;
+
+            quill.root.innerHTML = p.desc || "";
             document.getElementById('editKey').value = key;
-            document.getElementById('formTitle').innerText = "تعديل المنتج";
-            document.getElementById('cancelBtn').style.display = "block";
+            document.getElementById('formTitle').textContent = "تعديل المنتج";
+            document.getElementById('cancelBtn').classList.remove('hidden');
+
             window.scrollTo({ top: 0, behavior: 'smooth' });
         };
 
-        window.deleteProduct = (key) => {
-            if(confirm("حذف المنتج نهائياً؟")) remove(ref(db, 'products/' + key));
+        window.deleteProduct = async (key) => {
+            const p = allProducts[key];
+            const title = p?.title || 'هذا المنتج';
+            const confirmDelete = confirm(`حذف "${title}" نهائياً؟`);
+
+            if (!confirmDelete) return;
+
+            try {
+                await remove(ref(db, 'products/' + key));
+                alert("تم حذف المنتج.");
+            } catch (error) {
+                console.error(error);
+                alert("وقع خطأ أثناء حذف المنتج.");
+            }
         };
 
         window.resetForm = () => {
             document.getElementById('pName').value = "";
             document.getElementById('pPrice').value = "";
             document.getElementById('pCategory').value = "normal";
+            document.getElementById('editKey').value = "";
+            document.getElementById('formTitle').textContent = "إضافة منتج جديد";
+            document.getElementById('cancelBtn').classList.add('hidden');
+
             currentImagesArray = [];
             renderImagesPreview();
             quill.root.innerHTML = "";
-            document.getElementById('editKey').value = "";
-            document.getElementById('formTitle').innerText = "إضافة منتج جديد";
-            document.getElementById('cancelBtn').style.display = "none";
+            setSaveButtonState(false);
         };
+
+        onValue(ref(db, 'products'), (snapshot) => {
+            allProducts = snapshot.val() || {};
+            renderStats();
+            renderAdminList();
+        }, (error) => {
+            console.error(error);
+            document.getElementById('adminList').innerHTML = `<div class="empty-state">تعذر تحميل المنتجات حالياً.</div>`;
+        });
+
+        renderImagesPreview();
     </script>
 </body>
 </html>
